@@ -44,6 +44,7 @@
 
 #include <xbps.h>
 #include "queue.h"
+#include "xbps/xbps_dictionary.h"
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
@@ -825,8 +826,9 @@ process_archive(struct archive *ar,
 int
 main(int argc, char **argv)
 {
-	const char *shortopts = "A:B:C:c:D:F:G:H:hl:M:m:n:P:pqr:R:S:s:t:V";
+	const char *shortopts = "A:a:B:C:c:D:F:G:H:hl:M:m:n:P:pqr:R:S:s:t:V";
 	const struct option longopts[] = {
+		{ "abi", required_argument, NULL, 'a'},
 		{ "alternatives", required_argument, NULL, '4' },
 		{ "architecture", required_argument, NULL, 'A' },
 		{ "build-options", required_argument, NULL, '2' },
@@ -865,7 +867,7 @@ main(int argc, char **argv)
 	const char *provides, *pkgver, *replaces, *reverts, *desc, *ldesc;
 	const char *arch, *config_files, *mutable_files, *version, *changelog;
 	const char *buildopts, *shlib_provides, *shlib_requires, *alternatives;
-	const char *compression, *tags = NULL, *srcrevs = NULL, *sourcepkg = NULL;
+	const char *compression, *abi=NULL, *tags = NULL, *srcrevs = NULL, *sourcepkg = NULL;
 	char pkgname[XBPS_NAME_SIZE], *binpkg, *tname, *p, cwd[PATH_MAX-1];
 	bool quiet = false, preserve = false;
 	int c, pkg_fd;
@@ -883,6 +885,9 @@ main(int argc, char **argv)
 		switch (c) {
 		case 'A':
 			arch = optarg;
+			break;
+		case 'a':
+			abi = optarg;
 			break;
 		case 'B':
 			bwith = optarg;
@@ -1046,6 +1051,8 @@ main(int argc, char **argv)
 	if (changelog)
 		xbps_dictionary_set_cstring_nocopy(pkg_propsd,
 				"changelog", changelog);
+	if (abi)
+		xbps_dictionary_set_cstring_nocopy(pkg_propsd, "abi", abi);
 
 	/* Optional arrays */
 	process_array("run_depends", deps);
