@@ -295,6 +295,8 @@ install_new_pkg(struct xbps_handle *xhp, const char *pkg, bool force)
 		xbps_error_printf("Package `%s' contains invalid dependencies, exiting.\n", pkg);
 	else if (rv == EBUSY)
 		xbps_error_printf("The 'xbps' package must be updated, please run `xbps-install -u xbps`\n");
+	else if (rv == 1000000)
+		xbps_error_printf("ABI changed, full system upgrade required, please run `xbps-install -Su`\n");
 	else if (rv != 0) {
 		xbps_error_printf("Unexpected error: %s\n", strerror(rv));
 		rv = -1;
@@ -320,6 +322,8 @@ update_pkg(struct xbps_handle *xhp, const char *pkg, bool force)
 		xbps_error_printf("Package `%s' contains invalid dependencies, exiting.\n", pkg);
 	else if (rv == EBUSY)
 		xbps_error_printf("The 'xbps' package must be updated, please run `xbps-install -u xbps`\n");
+	else if (rv == 1000000)
+		xbps_error_printf("ABI changed, full system upgrade required, please run `xbps-install -Su`\n");
 	else if (rv != 0) {
 		xbps_error_printf("Unexpected error: %s\n", strerror(rv));
 		return -1;

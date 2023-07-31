@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <fnmatch.h>
 
+#include "xbps.h"
+#include "xbps/xbps_dictionary.h"
 #include "xbps_api_impl.h"
 
 /**
@@ -353,7 +355,8 @@ int
 xbps_transaction_update_pkg(struct xbps_handle *xhp, const char *pkg, bool force)
 {
 	xbps_array_t rdeps;
-	int rv;
+	int abi_repo, abi_pkg, rv;
+	char *tmp_abi = NULL;
 
 	rv = xbps_autoupdate(xhp);
 	xbps_dbg_printf("%s: xbps_autoupdate %d\n", __func__, rv);
@@ -362,7 +365,20 @@ xbps_transaction_update_pkg(struct xbps_handle *xhp, const char *pkg, bool force
 		/* xbps needs to be updated, only allow xbps to be updated */
 		if (strcmp(pkg, "xbps"))
 			return EBUSY;
-		return 0;
+		else {
+			/* check abi version */
+			xbps_dictionary_get_cstring(xhp->pkgdb, "abi", &tmp_abi);
+			abi_repo = atoi(tmp_abi);
+
+			xbps_dictionary_get_cstring(xbps_pkgdb_get_pkg(xhp, pkg), "abi", &tmp_abi);
+			abi_pkg = atoi(tmp_abi);
+
+			free(tmp_abi);
+
+			if (abi_pkg != abi_repo)
+				return 1000000;
+			return 0;
+		}
 	case -1:
 		/* error */
 		return EINVAL;
